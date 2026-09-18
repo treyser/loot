@@ -1,6 +1,6 @@
 import "./style.css";
 import OBR from "@owlbear-rodeo/sdk";
-import { MONSTER } from "./common.js";
+import { MONSTER, CUSTOM } from "./common.js";
 import { TIERS } from "./tables.js";
 import { hoard, individual, fromMonsters, worth } from "./generate.js";
 import { getSheets, give, split } from "./give.js";
@@ -35,6 +35,13 @@ async function init() {
 
   $("roll").addEventListener("click", generate);
   $("give").addEventListener("click", handOut);
+  $("ownAdd").addEventListener("click", () => addOwn(false));
+  $("ownSave").addEventListener("click", () => addOwn(true));
+  $("ownName").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addOwn(false);
+  });
+
+  await drawOwnList();
 
   await drawPeople();
   render();
@@ -64,6 +71,80 @@ async function generate() {
   }
 
   render();
+}
+
+// --- власні предмети ---
+
+// Додати предмет у поточну здобич; save — ще й запамʼятати для наступних разів
+async function addOwn(save) {
+  const name = $("ownName").value.trim();
+  if (!name) {
+    $("hint").textContent = "Впиши назву предмета";
+    return;
+  }
+  const note = $("ownNote").value.trim();
+  const qty = Math.max(1, Number($("ownQty").value) || 1);
+
+  // здобич могло ще не бути згенеровано — починаємо з порожньої
+  if (!result) result = { coins: { cp: 0, sp: 0, gp: 0, pp: 0 }, items: [] };
+
+  for (let i = 0; i < qty; i++) {
+    result.items.push({ name, note, kind: "own" });
+  }
+
+  if (save) {
+    const meta = await OBR.room.getMetadata();
+    const list = [...(meta[CUSTOM] ?? [])];
+    if (!list.some((x) => x.name === name && (x.note ?? "") === note)) {
+      list.push({ name, note });
+      await OBR.room.setMetadata({ [CUSTOM]: list });
+      await drawOwnList();
+    }
+  }
+
+  $("ownName").value = "";
+  $("ownNote").value = "";
+  $("ownQty").value = 1;
+  render();
+}
+
+async function drawOwnList() {
+  const meta = await OBR.room.getMetadata();
+  const list = meta[CUSTOM] ?? [];
+  const box = $("ownList");
+  box.innerHTML = "";
+
+  if (!list.length) {
+    box.innerHTML = '<div class="empty">Збережених предметів ще немає</div>';
+    return;
+  }
+
+  list.forEach((item, index) => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.title = "Додати до здобичі";
+    chip.textContent = item.note ? `${item.name} (${item.note})` : item.name;
+
+    chip.addEventListener("click", () => {
+      if (!result) result = { coins: { cp: 0, sp: 0, gp: 0, pp: 0 }, items: [] };
+      result.items.push({ name: item.name, note: item.note, kind: "own" });
+      render();
+    });
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.textContent = "×";
+    del.title = "Прибрати зі списку";
+    del.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const next = list.filter((_, i) => i !== index);
+      await OBR.room.setMetadata({ [CUSTOM]: next });
+      await drawOwnList();
+    });
+
+    chip.appendChild(del);
+    box.appendChild(chip);
+  });
 }
 
 async function drawPeople() {
@@ -118,13 +199,33 @@ function render() {
   head.innerHTML = `<div class="name"><b>${coinLine}</b><small>усього приблизно ${worth(result)} зм</small></div>`;
   box.appendChild(head);
 
-  for (const item of result.items) {
+  result.items.forEach((item, index) => {
     const row = document.createElement("div");
     row.className = "entry";
-    const tag = item.kind === "magic" ? "магія" : `${item.value} зм`;
-    row.innerHTML = `<div class="name">${item.name}<small>${tag}</small></div>`;
+
+    const tag = item.kind === "magic"
+      ? "магія"
+      : item.kind === "own"
+        ? (item.note || "свій предмет")
+        : `${item.value} зм`;
+
+    const name = document.createElement("div");
+    name.className = "name";
+    name.innerHTML = `${item.name}<small>${tag}</small>`;
+
+    const del = document.createElement("button");
+    del.className = "drop";
+    del.type = "button";
+    del.textContent = "×";
+    del.title = "Прибрати з здобичі";
+    del.addEventListener("click", () => {
+      result.items.splice(index, 1);
+      render();
+    });
+
+    row.append(name, del);
     box.appendChild(row);
-  }
+  });
 }
 
 async function handOut() {

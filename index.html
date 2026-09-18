@@ -21,6 +21,22 @@
 
     <div id="result" class="list"></div>
 
+    <details id="own">
+      <summary>Свій предмет</summary>
+      <div class="own-form">
+        <input id="ownName" placeholder="Назва предмета" maxlength="60">
+        <div class="grid2">
+          <input id="ownNote" placeholder="Підпис: 50 зм, магія…" maxlength="40">
+          <input id="ownQty" type="number" min="1" max="99" value="1">
+        </div>
+        <div class="row">
+          <button type="button" id="ownAdd">Додати до здобичі</button>
+          <button type="button" id="ownSave" class="ghost">Зберегти в список</button>
+        </div>
+        <div id="ownList" class="own-list"></div>
+      </div>
+    </details>
+
     <div id="giveBox" hidden>
       <label class="lbl" style="margin-top:14px">Кому видати</label>
       <div id="people" class="people"></div>

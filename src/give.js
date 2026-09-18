@@ -27,7 +27,13 @@ export async function give(shares) {
 
     const gear = [...(next.gear ?? [])];
     for (const item of part.items ?? []) {
-      const note = item.value ? `${item.value} зм` : (item.rank ? "магія" : "");
+      const note = item.kind === "own"
+        ? (item.note ?? "")
+        : item.value
+          ? `${item.value} зм`
+          : item.rank
+            ? "магія"
+            : "";
       const same = gear.find((g) => g.name === item.name && (g.note ?? "") === note);
       if (same) same.qty = String(num(same.qty) + 1);
       else gear.push({ name: item.name, qty: "1", note });
