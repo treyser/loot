@@ -1,0 +1,15 @@
+{
+  "name": "Здобич",
+  "version": "0.1.0",
+  "manifest_version": 1,
+  "description": "Генератор скарбів за таблицями DMG з видачею просто в листи персонажів.",
+  "author": "Nikita",
+  "icon": "https://treyser.github.io/loot/icon.svg",
+  "action": {
+    "title": "Здобич",
+    "icon": "https://treyser.github.io/loot/icon.svg",
+    "popover": "https://treyser.github.io/loot/index.html",
+    "width": 430,
+    "height": 640
+  }
+}

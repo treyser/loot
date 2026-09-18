@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Здобич</title></head>
+<body>
+  <div id="gm">
+    <label class="lbl">Звідки здобич</label>
+    <div class="tabs" id="mode">
+      <button type="button" data-mode="hoard" aria-selected="true">Скарбниця</button>
+      <button type="button" data-mode="individual">З кишень</button>
+      <button type="button" data-mode="scene">З ворогів на сцені</button>
+    </div>
+
+    <div id="tierBox">
+      <label class="lbl" for="tier" style="margin-top:10px">Рівень виклику</label>
+      <select id="tier"></select>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button type="button" id="roll">Згенерувати</button>
+    </div>
+
+    <div id="result" class="list"></div>
+
+    <div id="giveBox" hidden>
+      <label class="lbl" style="margin-top:14px">Кому видати</label>
+      <div id="people" class="people"></div>
+      <div class="row" style="margin-top:10px">
+        <button type="button" id="give">Видати в листи</button>
+      </div>
+    </div>
+
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div id="player" hidden class="hint">Здобич роздає Майстер.</div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
